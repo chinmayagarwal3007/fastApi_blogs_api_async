@@ -18,7 +18,7 @@ def get_db():
         db.close()
 
 
-@app.post("/blog", response_model = ShowBlogSchema, status_code=status.HTTP_201_CREATED)
+@app.post("/blog", response_model = ShowBlogSchema, status_code=status.HTTP_201_CREATED, tags=["blogs"])
 def create(request: BlogSchema, db: Session = Depends(get_db)):
     new_blog = BlogModel(title=request.title, body=request.body)
     db.add(new_blog)
@@ -26,12 +26,12 @@ def create(request: BlogSchema, db: Session = Depends(get_db)):
     db.refresh(new_blog)
     return new_blog
 
-@app.get("/blog/", response_model = ShowBlogSchema)
+@app.get("/blog/", response_model = ShowBlogSchema, tags=["blogs"])
 def get_all(db: Session = Depends(get_db)):
     blogs = db.query(BlogModel).all()
     return blogs
 
-@app.get("/blog/{id}", response_model = ShowBlogSchema)
+@app.get("/blog/{id}", response_model = ShowBlogSchema, tags=["blogs"])
 def show_blog(id: int, response: Response, db: Session = Depends(get_db)):
     blog = db.query(BlogModel).filter(BlogModel.id == id).first()
     if not blog:
@@ -40,7 +40,7 @@ def show_blog(id: int, response: Response, db: Session = Depends(get_db)):
         # return {"error": "Blog not found"}
     return blog
 
-@app.delete("/blog/{id}", status_code=status.HTTP_204_NO_CONTENT)   
+@app.delete("/blog/{id}", status_code=status.HTTP_204_NO_CONTENT, tags=["blogs"])   
 def delete_blog(id: int, db: Session = Depends(get_db)):
     blog = db.query(BlogModel).filter(BlogModel.id == id).first()
     if not blog:
@@ -48,7 +48,7 @@ def delete_blog(id: int, db: Session = Depends(get_db)):
     db.delete(blog)
     db.commit()
 
-@app.put("/blog/{id}", status_code=status.HTTP_202_ACCEPTED, response_model = ShowBlogSchema)
+@app.put("/blog/{id}", status_code=status.HTTP_202_ACCEPTED, response_model = ShowBlogSchema, tags=["blogs"])
 def update_blog(id: int, request: BlogSchema, db: Session = Depends(get_db)):
     blog = db.query(BlogModel).filter(BlogModel.id == id).first()
     if not blog:
@@ -61,7 +61,7 @@ def update_blog(id: int, request: BlogSchema, db: Session = Depends(get_db)):
 
 pwd_cxt = CryptContext(schemes=['bcrypt'], deprecated = auto)
 
-@app.post('/user', response_model = ShowUserSchema)
+@app.post('/user', response_model = ShowUserSchema, tags=["users"])
 def create_user(request:UserSchema,  db: Session = Depends(get_db)):
     hashed_password = pwd_cxt.hash(request.password)
     new_user = UserModel(name = request.name, email = request.email, password = hashed_password)
@@ -70,12 +70,12 @@ def create_user(request:UserSchema,  db: Session = Depends(get_db)):
     db.refresh(new_user)
     return new_user
 
-@app.get('/user', response_model =  ShowUserSchema)
+@app.get('/user', response_model =  ShowUserSchema, tags=["users"])
 def show_user(db: Session = Depends(get_db)):
     users = db.query(UserModel).all()
     return users
 
-@app.get('/user/{id}', response_model =  ShowUserSchema)
+@app.get('/user/{id}', response_model =  ShowUserSchema, tags=["users"])
 def show_user(id:int, db: Session = Depends(get_db)):
     user = db.query(UserModel).filter(UserModel.id == id).first()
     if not user:
