@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Depends, status, Response, HTTPException
 from sqlalchemy.orm import Session
-from .schemas import Blog as BlogSchema, User as UserSchema
+from .schemas import Blog as BlogSchema, User as UserSchema, ShowUser as ShowUserSchema
 from .models import Blog as BlogModel, User as UserModel, Base
 from .db import engine, SessionLocal
 from . import models
@@ -61,7 +61,7 @@ def update_blog(id: int, request: BlogSchema, db: Session = Depends(get_db)):
 
 pwd_cxt = CryptContext(schemes=['bcrypt'], deprecated = auto)
 
-@app.post('/user')
+@app.post('/user', response_model = ShowUserSchema)
 def create_user(request:UserSchema,  db: Session = Depends(get_db)):
     hashed_password = pwd_cxt.hash(request.password)
     new_user = UserModel(name = request.name, email = request.email, password = hashed_password)
@@ -69,4 +69,15 @@ def create_user(request:UserSchema,  db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_user)
     return new_user
-    
+
+@app.get('/user', response_model =  ShowUserSchema)
+def show_user(db: Session = Depends(get_db)):
+    users = db.query(UserModel).all()
+    return users
+
+@app.get('/user/{id}', response_model =  ShowUserSchema)
+def show_user(id:int, db: Session = Depends(get_db)):
+    user = db.query(UserModel).filter(UserModel.id == id).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    return user
