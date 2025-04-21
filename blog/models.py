@@ -7,3 +7,9 @@ class Blog(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String)
     body = Column(String)
+
+class User(Base):
+    __tablename__ = "users"
+    name = Column(String)
+    email = Column(String)
+    body = Colun(String)
