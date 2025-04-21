@@ -12,6 +12,13 @@ class User(BaseModel):
 class ShowUser(BaseModel):
     name: str
     email: str
-
     class Confing():
         orm_mode = True
+
+class ShowBlog(BaseModel):
+    title: str
+    body: str
+    creator: ShowUser
+    class Confing():
+        orm_mode = True
+
