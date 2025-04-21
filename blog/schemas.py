@@ -21,11 +21,17 @@ class ShowUser(BaseModel):
     blogs: List[BlogConfig] = []
     class Confing():
         orm_mode = True
+    
+class ShowUserSchemaWithoutBlogs(BaseModel):
+    name: str
+    email: str
+    class Config():
+        orm_mode = True
 
 class ShowBlog(BaseModel):
     title: str
     body: str
-    creator: ShowUser
+    creator: ShowUserSchemaWithoutBlogs
     class Confing():
         orm_mode = True
 

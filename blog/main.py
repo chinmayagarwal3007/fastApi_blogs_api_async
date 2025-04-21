@@ -5,6 +5,8 @@ from .models import Blog as BlogModel, User as UserModel, Base
 from .db import engine, SessionLocal
 from . import models
 from passlib.context import CryptContext
+from typing import List
+
 
 app = FastAPI()
 
@@ -20,13 +22,13 @@ def get_db():
 
 @app.post("/blog", response_model = ShowBlogSchema, status_code=status.HTTP_201_CREATED, tags=["blogs"])
 def create(request: BlogSchema, db: Session = Depends(get_db)):
-    new_blog = BlogModel(title=request.title, body=request.body)
+    new_blog = BlogModel(title=request.title, body=request.body, user_id = 1)
     db.add(new_blog)
     db.commit()
     db.refresh(new_blog)
     return new_blog
 
-@app.get("/blog/", response_model = ShowBlogSchema, tags=["blogs"])
+@app.get("/blog/", response_model = List[ShowBlogSchema], tags=["blogs"])
 def get_all(db: Session = Depends(get_db)):
     blogs = db.query(BlogModel).all()
     return blogs
@@ -59,7 +61,7 @@ def update_blog(id: int, request: BlogSchema, db: Session = Depends(get_db)):
     db.refresh(blog)
     return {"Updated_blog": blog}  
 
-pwd_cxt = CryptContext(schemes=['bcrypt'], deprecated = auto)
+pwd_cxt = CryptContext(schemes=['bcrypt'], deprecated = "auto")
 
 @app.post('/user', response_model = ShowUserSchema, tags=["users"])
 def create_user(request:UserSchema,  db: Session = Depends(get_db)):
@@ -70,7 +72,7 @@ def create_user(request:UserSchema,  db: Session = Depends(get_db)):
     db.refresh(new_user)
     return new_user
 
-@app.get('/user', response_model =  ShowUserSchema, tags=["users"])
+@app.get('/user', response_model =  List[ShowUserSchema], tags=["users"])
 def show_user(db: Session = Depends(get_db)):
     users = db.query(UserModel).all()
     return users
