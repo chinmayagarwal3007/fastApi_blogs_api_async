@@ -3,7 +3,8 @@ from fastapi import APIRouter, Depends, status, Response, HTTPException
 from sqlalchemy.orm import Session
 from ..schemas import Blog as BlogSchema, ShowBlog as ShowBlogSchema
 from ..models import Blog as BlogModel
-from ..db import engine, get_db
+from ..db import get_db
+from ..repository import blog as blog_repo
 
 router = APIRouter(
 tags=["blogs"],
@@ -12,8 +13,7 @@ prefix="/blog"
 
 @router.get("/", response_model = List[ShowBlogSchema])
 def get_all(db: Session = Depends(get_db)):
-    blogs = db.query(BlogModel).all()
-    return blogs
+    return blog_repo.get_all(db)
 
 @router.post("/", response_model = ShowBlogSchema, status_code=status.HTTP_201_CREATED)
 def create(request: BlogSchema, db: Session = Depends(get_db)):
