@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends, status, Response, HTTPException
 from sqlalchemy.orm import Session
-from .schemas import Blog as BlogSchema
-from .models import Blog as BlogModel
+from .schemas import Blog as BlogSchema, User as UserSchema
+from .models import Blog as BlogModel, User as UserModel
 from .db import engine, SessionLocal
 
 app = FastAPI()
@@ -56,3 +56,12 @@ def update_blog(id: int, request: BlogSchema, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(blog)
     return {"Updated_blog": blog}  
+
+@app.post('/user')
+def create_user(request:UserSchema,  db: Session = Depends(get_db)):
+    new_user = UserModel(request)
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return new_user
+    
