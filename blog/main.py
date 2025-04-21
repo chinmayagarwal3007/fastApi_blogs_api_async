@@ -3,10 +3,11 @@ from sqlalchemy.orm import Session
 from .schemas import Blog as BlogSchema, User as UserSchema
 from .models import Blog as BlogModel, User as UserModel
 from .db import engine, SessionLocal
+from . import models
 
 app = FastAPI()
 
-BlogModel.metadata.create_all(bind=engine)
+models.Base.metadata.create_all(bind=engine)
 
 def get_db():
     db = SessionLocal()
