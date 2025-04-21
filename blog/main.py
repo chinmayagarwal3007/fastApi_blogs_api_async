@@ -1,13 +1,14 @@
 from fastapi import FastAPI, Depends, status, Response, HTTPException
 from sqlalchemy.orm import Session
 from .schemas import Blog as BlogSchema, User as UserSchema
-from .models import Blog as BlogModel, User as UserModel
+from .models import Blog as BlogModel, User as UserModel, Base
 from .db import engine, SessionLocal
 from . import models
+from passlib.context import CryptContext
 
 app = FastAPI()
 
-models.Base.metadata.create_all(bind=engine)
+Base.metadata.create_all(bind=engine)
 
 def get_db():
     db = SessionLocal()
@@ -58,9 +59,12 @@ def update_blog(id: int, request: BlogSchema, db: Session = Depends(get_db)):
     db.refresh(blog)
     return {"Updated_blog": blog}  
 
+pwd_cxt = CryptContext(schemes=['bcrypt'], deprecated = auto)
+
 @app.post('/user')
 def create_user(request:UserSchema,  db: Session = Depends(get_db)):
-    new_user = UserModel(request)
+    hashed_password = pwd_cxt.hash(request.password)
+    new_user = UserModel(name = request.name, email = request.email, password = hashed_password)
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
