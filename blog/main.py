@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Depends, status, Response, HTTPException
 from sqlalchemy.orm import Session
-from .schemas import Blog as BlogSchema, User as UserSchema, ShowUser as ShowUserSchema
+from .schemas import Blog as BlogSchema, User as UserSchema, ShowUser as ShowUserSchema, ShowBlog as ShowBlogSchema
 from .models import Blog as BlogModel, User as UserModel, Base
 from .db import engine, SessionLocal
 from . import models
@@ -18,7 +18,7 @@ def get_db():
         db.close()
 
 
-@app.post("/blog", status_code=status.HTTP_201_CREATED)
+@app.post("/blog", response_model = ShowBlogSchema, status_code=status.HTTP_201_CREATED)
 def create(request: BlogSchema, db: Session = Depends(get_db)):
     new_blog = BlogModel(title=request.title, body=request.body)
     db.add(new_blog)
@@ -26,12 +26,12 @@ def create(request: BlogSchema, db: Session = Depends(get_db)):
     db.refresh(new_blog)
     return new_blog
 
-@app.get("/blog/")
+@app.get("/blog/", response_model = ShowBlogSchema)
 def get_all(db: Session = Depends(get_db)):
     blogs = db.query(BlogModel).all()
     return blogs
 
-@app.get("/blog/{id}")
+@app.get("/blog/{id}", response_model = ShowBlogSchema)
 def show_blog(id: int, response: Response, db: Session = Depends(get_db)):
     blog = db.query(BlogModel).filter(BlogModel.id == id).first()
     if not blog:
@@ -48,7 +48,7 @@ def delete_blog(id: int, db: Session = Depends(get_db)):
     db.delete(blog)
     db.commit()
 
-@app.put("/blog/{id}", status_code=status.HTTP_202_ACCEPTED)
+@app.put("/blog/{id}", status_code=status.HTTP_202_ACCEPTED, response_model = ShowBlogSchema)
 def update_blog(id: int, request: BlogSchema, db: Session = Depends(get_db)):
     blog = db.query(BlogModel).filter(BlogModel.id == id).first()
     if not blog:
