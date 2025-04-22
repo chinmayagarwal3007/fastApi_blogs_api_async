@@ -19,7 +19,7 @@ def login(request: LoginSchema, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == request.username).first()
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invalid credentials")
-    if pwd_cxt.verify(request.password, user.password):
+    if not pwd_cxt.verify(request.password, user.password):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invalid password")
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
