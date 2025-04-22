@@ -15,7 +15,7 @@ router = APIRouter(
 
 pwd_cxt = CryptContext(schemes=['bcrypt'], deprecated = "auto")
 
-@router.post("/login")
+@router.post("/token")
 def login(request: OAuth2PasswordRequestForm, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == request.username).first()
     if not user:
