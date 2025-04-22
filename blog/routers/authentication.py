@@ -7,7 +7,7 @@ from passlib.context import CryptContext
 from datetime import timedelta
 from ..token import ACCESS_TOKEN_EXPIRE_MINUTES, create_access_token
 from ..schemas import Token
-rom fastapi.security import OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordRequestForm
 
 router = APIRouter(
     tags=["authentication"]
