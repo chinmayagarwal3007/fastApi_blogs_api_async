@@ -17,7 +17,7 @@ def get_all(db: Session = Depends(get_db), current_user: UserSchema = Depends(ge
     return blog_repo.get_all(db)
 
 @router.post("/", response_model = ShowBlogSchema, status_code=status.HTTP_201_CREATED)
-def create(request: BlogSchema, db: Session = Depends(get_db)):
+def create(request: BlogSchema, db: Session = Depends(get_db), current_user: UserSchema = Depends(get_current_user)):
     new_blog = BlogModel(title=request.title, body=request.body, user_id = 1)
     db.add(new_blog)
     db.commit()
@@ -26,7 +26,7 @@ def create(request: BlogSchema, db: Session = Depends(get_db)):
 
 
 @router.get("/{id}", response_model = ShowBlogSchema)
-def show_blog(id: int, response: Response, db: Session = Depends(get_db)):
+def show_blog(id: int, response: Response, db: Session = Depends(get_db), current_user: UserSchema = Depends(get_current_user)):
     blog = db.query(BlogModel).filter(BlogModel.id == id).first()
     if not blog:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Blog not found")
@@ -35,7 +35,7 @@ def show_blog(id: int, response: Response, db: Session = Depends(get_db)):
     return blog
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)   
-def delete_blog(id: int, db: Session = Depends(get_db)):
+def delete_blog(id: int, db: Session = Depends(get_db), current_user: UserSchema = Depends(get_current_user)):
     blog = db.query(BlogModel).filter(BlogModel.id == id).first()
     if not blog:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Blog not found")
@@ -43,7 +43,7 @@ def delete_blog(id: int, db: Session = Depends(get_db)):
     db.commit()
 
 @router.put("/{id}", status_code=status.HTTP_202_ACCEPTED, response_model = ShowBlogSchema)
-def update_blog(id: int, request: BlogSchema, db: Session = Depends(get_db)):
+def update_blog(id: int, request: BlogSchema, db: Session = Depends(get_db), current_user: UserSchema = Depends(get_current_user)):
     blog = db.query(BlogModel).filter(BlogModel.id == id).first()
     if not blog:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Blog not found")
