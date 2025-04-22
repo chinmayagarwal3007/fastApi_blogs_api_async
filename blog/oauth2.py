@@ -1,8 +1,8 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from ..token import SECRET_KEY, ALOGORITHM
+from .token import SECRET_KEY, ALOGORITHM
 from jose import jwt
-from ..schemas import TokenData
+from .schemas import TokenData
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
