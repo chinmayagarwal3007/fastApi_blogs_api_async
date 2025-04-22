@@ -2,10 +2,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 
-dotenv_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
-load_dotenv(dotenv_path)
+#dotenv_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
+#load_dotenv(dotenv_path)
 
 username = os.getenv('DB_USERNAME')
 password = os.getenv('PASSWORD')
