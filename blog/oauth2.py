@@ -1,6 +1,6 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from .token import SECRET_KEY, ALOGORITHM
+from .token import SECRET_KEY, ALGORITHM
 from jose import jwt
 from typing import Annotated
 from .schemas import TokenData
