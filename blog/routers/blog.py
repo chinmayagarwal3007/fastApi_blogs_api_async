@@ -18,7 +18,7 @@ def get_all(db: Session = Depends(get_db), current_user: UserSchema = Depends(ge
 
 @router.post("/", response_model = ShowBlogSchema, status_code=status.HTTP_201_CREATED)
 def create(request: BlogSchema, db: Session = Depends(get_db), current_user: UserSchema = Depends(get_current_user)):
-    new_blog = BlogModel(title=request.title, body=request.body, user_id = 1)
+    new_blog = BlogModel(title=request.title, body=request.body, user_id = current_user.id)
     db.add(new_blog)
     db.commit()
     db.refresh(new_blog)
