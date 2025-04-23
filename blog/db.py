@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os
@@ -15,19 +15,26 @@ database = os.getenv('DATABASE')
 if not all([username, password, neon_url, database]):
     raise ValueError("Missing one or more environment variables for the database connection.")
 
+# ASYNC DATABASE URL (use asyncpg instead of default psycopg2)
+SQLALCHEMY_DATABASE_URL = f"postgresql+asyncpg://{username}:{password}@{neon_url}/{database}?sslmode=require"
 
-SQLALCHEMY_DATABASE_URL = f"postgresql://{username}:{password}@{neon_url}/{database}?sslmode=require"
+# Async engine
+engine = create_async_engine(SQLALCHEMY_DATABASE_URL, echo=True)
 
+# Async sessionmaker
+AsyncSessionLocal = sessionmaker(
+    bind=engine,
+    expire_on_commit=False,
+    class_=AsyncSession,
+)
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
-
-SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
-
+# Declarative base class
 Base = declarative_base()
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+# Dependency for FastAPI
+async def get_db():
+    async with AsyncSessionLocal() as session:
+        try:
+            yield session
+        finally:
+            await session.close()

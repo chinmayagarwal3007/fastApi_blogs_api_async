@@ -1,7 +1,8 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 from ..models import Blog as BlogModel
 
-
-def get_all(db: Session):
-    blogs = db.query(BlogModel).all()
+async def get_all(db: AsyncSession):
+    result = await db.execute(select(BlogModel))
+    blogs = result.scalars().all()  # Fetch all the blogs asynchronously
     return blogs
