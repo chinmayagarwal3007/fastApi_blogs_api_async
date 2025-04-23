@@ -2,6 +2,7 @@ from typing import List
 from fastapi import APIRouter, Depends, status, Response, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy.orm import selectinload
 from ..schemas import Blog as BlogSchema, ShowBlog as ShowBlogSchema, User as UserSchema
 from ..models import Blog as BlogModel
 from ..db import get_db
@@ -14,7 +15,9 @@ router = APIRouter(
 
 @router.get("/", response_model=List[ShowBlogSchema])
 async def get_all(db: AsyncSession = Depends(get_db), current_user: UserSchema = Depends(get_current_user)):
-    result = await db.execute(select(BlogModel))
+    result = await db.execute(
+        select(BlogModel).options(selectinload(BlogModel.creator))  # Eager-load the 'creator' relationship
+    )
     blogs = result.scalars().all()
     return blogs
 
@@ -28,7 +31,9 @@ async def create(request: BlogSchema, db: AsyncSession = Depends(get_db), curren
 
 @router.get("/{id}", response_model=ShowBlogSchema)
 async def show_blog(id: int, db: AsyncSession = Depends(get_db), current_user: UserSchema = Depends(get_current_user)):
-    result = await db.execute(select(BlogModel).where(BlogModel.id == id))
+    result = await db.execute(
+        select(BlogModel).where(BlogModel.id == id).options(selectinload(BlogModel.creator))  # Eager-load 'creator'
+    )
     blog = result.scalars().first()
     if not blog:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Blog not found")
@@ -45,12 +50,20 @@ async def delete_blog(id: int, db: AsyncSession = Depends(get_db), current_user:
 
 @router.put("/{id}", status_code=status.HTTP_202_ACCEPTED, response_model=ShowBlogSchema)
 async def update_blog(id: int, request: BlogSchema, db: AsyncSession = Depends(get_db), current_user: UserSchema = Depends(get_current_user)):
-    result = await db.execute(select(BlogModel).where(BlogModel.id == id))
+    result = await db.execute(
+        select(BlogModel).where(BlogModel.id == id).options(selectinload(BlogModel.creator))  # Eager-load creator
+    )
     blog = result.scalars().first()
     if not blog:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Blog not found")
+    
+    if blog.creator.id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not the creator of this blog, and cannot update it.")
+    # Update blog fields
     blog.title = request.title
     blog.body = request.body
     await db.commit()
     await db.refresh(blog)
-    return {"Updated_blog": blog}
+    
+    # Return the blog directly (not wrapped in a dictionary)
+    return blog
